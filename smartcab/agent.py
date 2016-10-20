@@ -26,6 +26,7 @@ class LearningAgent(Agent):
         
         # TODO: Select action according to your policy
         action = random.choice([None, 'forward', 'left', 'right'])
+        # action = self.next_waypoint
 
         # Execute action and get reward
         reward = self.env.act(self, action)
@@ -45,7 +46,7 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.5, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=2.0, display=True)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials
