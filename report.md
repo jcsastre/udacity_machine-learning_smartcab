@@ -12,7 +12,7 @@ number of moves available).
 The code corresponding to this agent can be found on the class 
 "RandomAgent" at the file "agent.py".
 
-Observations:
+Observations from simulation:
 
 1. Normally the smartcab action is not optimal, but normally reaches the
 destination because has a lot of moves available to reach the destination.
@@ -22,25 +22,46 @@ violates traffic rules, but a strong negative reward is applied.
 
 <h2>Inform the Driving Agent</h2>
 
-The next task is to identify a set of states useful to determine actions that 
-allows to arrive to the next waypoint provided by the planner, but also these
-actions have to obbey the traffic rules.
+The next task  is to identify a set of states that are appropriate for modeling 
+the smartcab and environment. 
 
-The possible values for next waypoint are: Forward / Right / Left
+The planner provides the property next_waypoint with these possible values: 
+Forward, Right and Left.
  
-Each time agent senses the environment it receives these inputs:
+Each time agent senses the environment it receives these properties:
 
 - Light
-    - Values: Red / Green
+    - Possible values: Red / Green
 - Oncoming:
-    - Values: None / Forward / Right / Left
+    - Possible values: None / Forward / Right / Left
     - Indicates if there is a car oncoming and the action wants to execute.
 - Right:
-    - Values: None / Forward / Right / Left
+    - Possible values: None / Forward / Right / Left
     - Indicates if there is a car approaching from the right oncoming and 
     the action wants to execute.
 - Left:
-    - Values: None / Forward / Right / Left
+    - Possible values: None / Forward / Right / Left
     - Indicates if there is a car approaching from the left oncoming and 
     the action wants to execute.
+    
+All these properties will be used as state for the smartcab:
+
+1. Next waypoint.
+2. Light. 
+3. Oncoming.
+4. Right
+5. Left
+    
+After each step we update the state, and then select an action that tries to
+follow the Next Waypoint suggested by the planner, but without violating traffic
+rules.
+    
+Observations from simulation:
+
+1. The smartcab always reaches the destination. The reasons are that now the
+smartcab tries to move to next waypoint suggested by planner, and also that
+has a lot of moves available.
+2. The smartcab never receives a negative reward because now information about
+light and other cars is taken into account before executing any action.
+
 

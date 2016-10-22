@@ -49,19 +49,24 @@ class InformedAgent(Agent):
 
         # Update state
         self.state = inputs
+        # self.state.insert('next_waypoint', self.next_waypoint)
         self.state['next_waypoint'] = self.next_waypoint
+        # print "***********"
+        # print format(self.state)
+        # print "***********"
 
         # Select action according to your policy
-        action = self.state.next_waypoint
-        if self.state.next_waypoint == 'forward':
-            if self.state.light == 'red':
-                action = 'None'
-        elif self.state.next_waypoint == 'right':
-            if self.state.light == 'red' or self.state.left == 'forward':
-                action = 'None'
-        elif self.state.next_waypoint == 'left':
-            if self.state.light == 'red' or (self.state.oncoming == 'forward' or self.state.oncoming == 'right'):
-                action = 'None'
+        action = self.state['next_waypoint']
+        if action == 'forward':
+            if self.state['light'] == 'red':
+                action = None
+        elif action == 'right':
+            if self.state['light'] == 'red' or self.state['left'] == 'forward':
+                action = None
+        elif action == 'left':
+            if self.state['light'] == 'red' or (self.state['oncoming'] == 'forward' or self.state['oncoming'] ==
+                'right'):
+                action = None
 
         # Execute action and get reward
         reward = self.env.act(self, action)
@@ -107,7 +112,7 @@ def run():
 
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
-    a = e.create_agent(RandomAgent)  # create agent
+    a = e.create_agent(InformedAgent)  # create agent
     e.set_primary_agent(a, enforce_deadline=False)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
