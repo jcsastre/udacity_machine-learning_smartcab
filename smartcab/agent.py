@@ -44,16 +44,13 @@ class InformedAgent(Agent):
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
+        print self.next_waypoint
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
 
         # Update state
         self.state = inputs
-        # self.state.insert('next_waypoint', self.next_waypoint)
         self.state['next_waypoint'] = self.next_waypoint
-        # print "***********"
-        # print format(self.state)
-        # print "***********"
 
         # Select action according to your policy
         action = self.state['next_waypoint']
