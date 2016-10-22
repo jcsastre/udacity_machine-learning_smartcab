@@ -3,6 +3,31 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 
+class RandomAgent(Agent):
+    """An agent that learns to drive in the smartcab world."""
+
+    def __init__(self, env):
+        super(RandomAgent, self).__init__(
+            env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
+        self.color = 'red'  # override color
+        self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
+
+    def reset(self, destination=None):
+        self.planner.route_to(destination)
+
+    def update(self, t):
+        # Gather inputs
+        self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
+        inputs = self.env.sense(self)
+        deadline = self.env.get_deadline(self)
+
+        action = random.choice([None, 'forward', 'left', 'right'])
+
+        # Execute action and get reward
+        reward = self.env.act(self, action)
+
+        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
@@ -25,8 +50,8 @@ class LearningAgent(Agent):
         # TODO: Update state
         
         # TODO: Select action according to your policy
-        action = random.choice([None, 'forward', 'left', 'right'])
-        # action = self.next_waypoint
+        # action = random.choice([None, 'forward', 'left', 'right'])
+        # # action = self.next_waypoint
 
         # Execute action and get reward
         reward = self.env.act(self, action)
@@ -41,7 +66,7 @@ def run():
 
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
-    a = e.create_agent(LearningAgent)  # create agent
+    a = e.create_agent(RandomAgent)  # create agent
     e.set_primary_agent(a, enforce_deadline=False)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
