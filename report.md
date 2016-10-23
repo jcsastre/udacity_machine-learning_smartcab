@@ -53,7 +53,7 @@ moves to reach the destination.
 The planner provides **next_waypoint** with these possible values: Forward, Right
 and Left.
 
-For the representing the state we will use: **next_waypoint**, **light**, **oncoming**, 
+For representing the state we will use: **next_waypoint**, **light**, **oncoming**, 
 **right** and **left**.
 
 Having in mind we have **next_waypoint**, is not very useful to use also **deadline**. Also
@@ -68,7 +68,7 @@ Having in mind the properties used for the state, and possible values for each o
 these, the total number of different states are: 3 x 2 x 4 x 4 x 4. This means a
 total of 384 states at a given time.
 
-TODO Optional: Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?
+<h2>Implement a Q-Learning Driving Agent</h2>
 
 <!--Observations from simulation:-->
 

@@ -29,17 +29,55 @@ class RandomAgent(Agent):
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
-class InformedAgent(Agent):
+class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
-    def __init__(self, env):
-        super(InformedAgent, self).__init__(
-            env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
+    def __init__(self, env, epsilon_rate=0.5):
+        # sets self.env = env, state = None, next_waypoint = None, and a default color
+        super(QLearningAgent, self).__init__(env)
+
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
 
+        self.valid_actions = Environment.valid_actions
+
+        self.epsilon = epsilon_rate  # Exploration rate
+        self.q_matrix = {}
+
     def reset(self, destination=None):
         self.planner.route_to(destination)
+
+    def get_q_value(self, state, action):
+        key = (state, action)
+        return self.q_matrix.get(key, 0)
+
+    def get_max_q(self, state):
+        q = [self.get_q_value(state, a) for a in self.valid_actions]
+        return max(q)
+
+    def choose_action(self, state):
+        if random.random() < self.epsilon:
+            best = [i for i in range(len(self.valid_actions)) if q[i] == maxQ]
+            i = random.choice(best)
+        else:
+            i = q.index(maxQ)
+
+        action = self.actions[i]
+        return action
+
+        if random.random() < self.epsilon:
+            action = random.choice(Environment.valid_actions)
+        else:
+            q = [self.get_q_value(state, a) for a in Environment.valid_actions]
+            if q.count(max(q)) > 1:
+                best_actions = [i for i in range(len(Environment.valid_actions)) if q[i] == max(q)]
+                index = random.choice(best_actions)
+
+            else:
+                index = q.index(max(q))
+            action = Environment.valid_actions[index]
+
+        return action
 
     def update(self, t):
         # Gather inputs
@@ -53,17 +91,19 @@ class InformedAgent(Agent):
         self.state['next_waypoint'] = self.next_waypoint
 
         # Select action according to your policy
-        action = self.state['next_waypoint']
-        if action == 'forward':
-            if self.state['light'] == 'red':
-                action = None
-        elif action == 'right':
-            if self.state['light'] == 'red' or self.state['left'] == 'forward':
-                action = None
-        elif action == 'left':
-            if self.state['light'] == 'red' or (self.state['oncoming'] == 'forward' or self.state['oncoming'] ==
-                'right'):
-                action = None
+        action = self.get_action_based_on_epsilon_policy(self.state)
+
+        # action = self.state['next_waypoint']
+        # if action == 'forward':
+        #     if self.state['light'] == 'red':
+        #         action = None
+        # elif action == 'right':
+        #     if self.state['light'] == 'red' or self.state['left'] == 'forward':
+        #         action = None
+        # elif action == 'left':
+        #     if self.state['light'] == 'red' or (self.state['oncoming'] == 'forward' or self.state['oncoming'] ==
+        #         'right'):
+        #         action = None
 
         # Execute action and get reward
         reward = self.env.act(self, action)
@@ -93,8 +133,6 @@ class LearningAgent(Agent):
         # TODO: Update state
         
         # TODO: Select action according to your policy
-        # action = random.choice([None, 'forward', 'left', 'right'])
-        # # action = self.next_waypoint
 
         # Execute action and get reward
         reward = self.env.act(self, action)
