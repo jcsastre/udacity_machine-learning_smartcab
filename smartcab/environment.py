@@ -65,6 +65,11 @@ class Environment(object):
         self.primary_agent = None  # to be set explicitly
         self.enforce_deadline = False
 
+        self.file_report_1 = open('file_report_1.txt', 'w')
+        self.file_report_1_head = "q_size\tcum_reward\n"
+        self.file_report_1_fmt = "{q_size:s}\t{cum_reward:s}\n"
+        self.file_report_1.write(self.file_report_1_head)
+
     def create_agent(self, agent_class, *args, **kwargs):
         agent = agent_class(self, *args, **kwargs)
         self.agent_states[agent] = {'location': random.choice(self.intersections.keys()), 'heading': (0, 1)}
@@ -126,6 +131,11 @@ class Environment(object):
             elif self.enforce_deadline and agent_deadline <= 0:
                 self.done = True
                 print "Environment.step(): Primary agent ran out of time! Trial aborted."
+                self.primary_agent.stats_add_row()
+                self.primary_agent.stats_save_to_file()
+
+                print "LearningAgent stats: q_values_count = {}, reward_cum = {}".format(0,
+                                                                                         self.primary_agent.cum_reward)  # [debug]
             self.agent_states[self.primary_agent]['deadline'] = agent_deadline - 1
 
         self.t += 1
@@ -231,6 +241,9 @@ class Agent(object):
         self.color = 'cyan'
 
     def reset(self, destination=None):
+        pass
+
+    def get_cum_reward(self):
         pass
 
     def update(self, t):

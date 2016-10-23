@@ -10,11 +10,11 @@ that smartcat has an infinite number of moves as can see on code of the file
 number of moves available).
 
 The code corresponding to this agent can be found on the class 
-"RandomAgent" at the file "agent.py":
+"RandomAgent" at the file "agent.py".
 
-```
-action = random.choice([None, 'forward', 'left', 'right'])
-```
+<!--```-->
+<!--action = random.choice([None, 'forward', 'left', 'right'])-->
+<!--```-->
 
 Observations from simulation:
 
@@ -69,6 +69,28 @@ these, the total number of different states are: 3 x 2 x 4 x 4 x 4. This means a
 total of 384 states at a given time.
 
 <h2>Implement a Q-Learning Driving Agent</h2>
+
+The third task is to implement the Q-Learning algorithm for the driving agent.
+
+The code corresponding to this agent can be found on the class 
+"QLearningAgent" at the file "agent.py".
+
+By default the values for constants of Q-Learning formula will be:
+- Alpha = 0.5
+- Epsilon = 0.5
+- Gamma = 0.5
+
+Also in the end of each step, the number of Q-values will be printed by console.
+
+The simulation will be started with enforce_deadline to True. Observations:
+
+1. We see that normally the smartcab doesn't reach the destination. This is
+because the deadline is set to True and there too few movements available.
+2. As the simulations are executed (until n=100), the the number of Q-values increases. At
+the beginning fast, but later slow. This is normal because the number of scenarios
+ not visited decreases while simulations accumulate.
+3. Theorically, as the simulations execute, the QLearningAgent learns, so hopefully
+the number of negative rewards should decrease with time.
 
 <!--Observations from simulation:-->
 

@@ -3,37 +3,39 @@ import random
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
+import pandas as pd
+import numpy as np
 
-# class RandomAgent(Agent):
-#     """An agent that learns to drive in the smartcab world."""
-#
-#     def __init__(self, env):
-#         super(RandomAgent, self).__init__(
-#             env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
-#         self.color = 'red'  # override color
-#         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
-#
-#     def reset(self, destination=None):
-#         self.planner.route_to(destination)
-#
-#     def update(self, t):
-#         # Gather inputs
-#         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
-#         inputs = self.env.sense(self)
-#         deadline = self.env.get_deadline(self)
-#
-#         # Random update of the state
-#         action = random.choice([None, 'forward', 'left', 'right'])
-#
-#         # Execute action and get reward
-#         reward = self.env.act(self, action)
-#
-#         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+class RandomAgent(Agent):
+    """An agent that learns to drive in the smartcab world."""
+
+    def __init__(self, env):
+        super(RandomAgent, self).__init__(
+            env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
+        self.color = 'red'  # override color
+        self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
+
+    def reset(self, destination=None):
+        self.planner.route_to(destination)
+
+    def update(self, t):
+        # Gather inputs
+        self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
+        inputs = self.env.sense(self)
+        deadline = self.env.get_deadline(self)
+
+        # Random update of the state
+        action = random.choice([None, 'forward', 'left', 'right'])
+
+        # Execute action and get reward
+        reward = self.env.act(self, action)
+
+        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
-    def __init__(self, env, epsilon_rate=0.5, alpha_rate=0.5, gamma_rate=0.5):
+    def __init__(self, env, alpha_rate=0.5, epsilon_rate=0.5, gamma_rate=0.5):
         # sets self.env = env, state = None, next_waypoint = None, and a default color
         super(QLearningAgent, self).__init__(env)
 
@@ -51,8 +53,34 @@ class QLearningAgent(Agent):
         self.previous_state = None
         self.previous_action = None
 
+        self.cum_reward = 0
+
+        self.df_stats = pd.DataFrame(columns=['cum_q', 'cum_reward'])
+
+        self.stats = []
+
+    def stats_add_row(self):
+        # df = pd.DataFrame([[len(self.q_matrix), self.cum_reward]], columns=['cum_q', 'cum_reward'])
+        # self.df_stats = self.df_stats.append(df)
+
+        self.stats.append((len(self.q_matrix), self.cum_reward))
+        print self.stats
+
+    def stats_save_to_file(self):
+        df = pd.DataFrame(data=self.stats, columns=['q_size', 'cum_reward'])
+        print df
+
     def reset(self, destination=None):
         self.planner.route_to(destination)
+
+        self.state = None
+        self.previous_state = None
+        self.previous_action = None
+
+        self.cum_reward = 0
+
+    def get_cum_reward(self):
+        return self.cum_reward
 
     def get_q_value(self, state, action):
         key = (state, action)
@@ -100,8 +128,9 @@ class QLearningAgent(Agent):
 
         # Execute action and get reward
         reward = self.env.act(self, action)
+        self.cum_reward = self.cum_reward + reward
 
-        # TODO: Learn policy based on state, action, reward
+        # Learn policy based on state, action, reward
         if reward is not None:
             self.learn(self.previous_state, self.previous_action, reward, self.state)
 
@@ -109,10 +138,16 @@ class QLearningAgent(Agent):
         self.previous_state = self.state
         self.previous_action = action
 
-        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+        # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, q_size = {}".format(
+        #     deadline, inputs, action, reward, len(self.q_matrix))  # [debug]
 
 def run():
     """Run the agent for a finite number of trials."""
+
+    # df = pd.DataFrame(columns=['q_size', 'cum_reward'])
+    # df = df.append([{'q_size': 3, 'cum_reward': 2}])
+    # print df
+    # quit()
 
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
@@ -121,10 +156,11 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.1, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=0.001, display=False)  # create simulator (uses pygame when display=True,
+    # if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
-    sim.run(n_trials=100)  # run for a specified number of trials
+    sim.run(n_trials=10)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
 
 
