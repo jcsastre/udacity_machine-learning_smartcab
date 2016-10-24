@@ -105,6 +105,8 @@ class Simulator(object):
             if self.quit:
                 break
 
+        self.env.print_primary_agent_stats()
+
     def render(self):
         # Clear screen
         self.screen.fill(self.bg_color)

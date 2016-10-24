@@ -75,14 +75,22 @@ The third task is to implement the Q-Learning algorithm for the driving agent.
 The code corresponding to this agent can be found on the class 
 "QLearningAgent" at the file "agent.py".
 
-By default the values for constants of Q-Learning formula will be:
-- Alpha = 0.5
-- Epsilon = 0.5
-- Gamma = 0.5
+The values for three important constants should be assigned:
+- *alpha_rate (α)*: The learning rate. Determines to what extent the newly acquired 
+information will override the old information.
+- *epsilon_rate (ε)*: The exploration rate. Determines when to explorer or
+when to exploit learned information.
+- *gamma rate (γ)*: The discount factor. Determines the importance of future 
+rewards.
 
-Also in the end of each step, the number of Q-values will be printed by console.
+We will execute 100 simulations with enforce_deadline to True. The values for
+the constants will be *alpha_rate (α)* = 0.9, *epsilon_rate (ε)* = 0.1 and
+*gamma rate (γ)* = 0.5. Also in the end of each simulation a report
+with the size 
 
-The simulation will be started with enforce_deadline to True. Observations:
+
+
+ Observations:
 
 1. We see that normally the smartcab doesn't reach the destination. This is
 because the deadline is set to True and there too few movements available.

@@ -4,7 +4,7 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 import pandas as pd
-import numpy as np
+from altair import Chart
 
 class RandomAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -30,12 +30,13 @@ class RandomAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
 
-        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}" \
+            . format(deadline, inputs,action, reward)  # [debug]
 
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
-    def __init__(self, env, alpha_rate=0.5, epsilon_rate=0.5, gamma_rate=0.5):
+    def __init__(self, env, alpha_rate=0.9, epsilon_rate=0.1, gamma_rate=0.5):
         # sets self.env = env, state = None, next_waypoint = None, and a default color
         super(QLearningAgent, self).__init__(env)
 
@@ -44,8 +45,8 @@ class QLearningAgent(Agent):
 
         self.valid_actions = Environment.valid_actions
 
-        self.epsilon = epsilon_rate  # Exploration rate
         self.alpha = alpha_rate  # Learning rate
+        self.epsilon = epsilon_rate  # Exploration rate
         self.gamma = gamma_rate # Discount factor rate
 
         self.q_matrix = {}
@@ -55,19 +56,20 @@ class QLearningAgent(Agent):
 
         self.cum_reward = 0
 
-        self.df_stats = pd.DataFrame(columns=['cum_q', 'cum_reward'])
-
         self.stats = []
 
-    def stats_add_row(self):
-        # df = pd.DataFrame([[len(self.q_matrix), self.cum_reward]], columns=['cum_q', 'cum_reward'])
-        # self.df_stats = self.df_stats.append(df)
+    def stats_add_row(self, success):
+        self.stats.append(
+            (len(self.q_matrix), self.cum_reward, success)
+        )
 
-        self.stats.append((len(self.q_matrix), self.cum_reward))
-        print self.stats
+    def stats_print(self):
+        df = pd.DataFrame(data=self.stats, columns=['q_size', 'cum_reward', 'success'])
+        print df
 
     def stats_save_to_file(self):
-        df = pd.DataFrame(data=self.stats, columns=['q_size', 'cum_reward'])
+        df = pd.DataFrame(data=self.stats, columns=['q_size', 'cum_reward', 'success'])
+        df.to_csv('stats.csv', sep="\t")
         print df
 
     def reset(self, destination=None):
@@ -160,7 +162,7 @@ def run():
     # if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
-    sim.run(n_trials=10)  # run for a specified number of trials
+    sim.run(n_trials=100)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
 
 

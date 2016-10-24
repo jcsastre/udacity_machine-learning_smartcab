@@ -65,11 +65,6 @@ class Environment(object):
         self.primary_agent = None  # to be set explicitly
         self.enforce_deadline = False
 
-        self.file_report_1 = open('file_report_1.txt', 'w')
-        self.file_report_1_head = "q_size\tcum_reward\n"
-        self.file_report_1_fmt = "{q_size:s}\t{cum_reward:s}\n"
-        self.file_report_1.write(self.file_report_1_head)
-
     def create_agent(self, agent_class, *args, **kwargs):
         agent = agent_class(self, *args, **kwargs)
         self.agent_states[agent] = {'location': random.choice(self.intersections.keys()), 'heading': (0, 1)}
@@ -78,6 +73,10 @@ class Environment(object):
     def set_primary_agent(self, agent, enforce_deadline=False):
         self.primary_agent = agent
         self.enforce_deadline = enforce_deadline
+
+    def print_primary_agent_stats(self):
+        # self.primary_agent.stats_print()
+        self.primary_agent.stats_save_to_file()
 
     def reset(self):
         self.done = False
@@ -128,11 +127,12 @@ class Environment(object):
             if agent_deadline <= self.hard_time_limit:
                 self.done = True
                 print "Environment.step(): Primary agent hit hard time limit ({})! Trial aborted.".format(self.hard_time_limit)
+                self.primary_agent.stats_add_row(False)
             elif self.enforce_deadline and agent_deadline <= 0:
                 self.done = True
                 print "Environment.step(): Primary agent ran out of time! Trial aborted."
-                self.primary_agent.stats_add_row()
-                self.primary_agent.stats_save_to_file()
+                self.primary_agent.stats_add_row(False)
+                # self.primary_agent.stats_save_to_file()
 
                 print "LearningAgent stats: q_values_count = {}, reward_cum = {}".format(0,
                                                                                          self.primary_agent.cum_reward)  # [debug]
@@ -221,6 +221,7 @@ class Environment(object):
                     reward += 10  # bonus
                 self.done = True
                 print "Environment.act(): Primary agent has reached destination!"  # [debug]
+                self.primary_agent.stats_add_row(True)
             self.status_text = "state: {}\naction: {}\nreward: {}".format(agent.get_state(), action, reward)
             #print "Environment.act() [POST]: location: {}, heading: {}, action: {}, reward: {}".format(location, heading, action, reward)  # [debug]
 
