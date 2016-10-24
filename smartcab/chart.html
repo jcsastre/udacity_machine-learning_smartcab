@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+<head>
+  <title>Vega-Lite Chart</title>
+  <meta charset="utf-8">
+
+  <script src="//d3js.org/d3.v3.min.js"></script>
+  <script src="//vega.github.io/vega/vega.js"></script>
+  <script src="//vega.github.io/vega-lite/vega-lite.js"></script>
+  <script src="//vega.github.io/vega-editor/vendor/vega-embed.js" charset="utf-8"></script>
+
+  <style media="screen">
+    /* Add space between vega-embed links  */
+    .vega-actions a {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Container for the visualization -->
+  <div id="vis"></div>
+
+  <script>
+  var vlSpec = {
+    "mark": "point", 
+    "data": {
+        "values": [
+            {
+                "q_size": 14, 
+                "cum_reward": 0.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 17, 
+                "cum_reward": 2.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 22, 
+                "cum_reward": -1.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 28, 
+                "cum_reward": -4.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 30, 
+                "cum_reward": -4.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 30, 
+                "cum_reward": -3.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 30, 
+                "cum_reward": -1.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 30, 
+                "cum_reward": -5.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 34, 
+                "cum_reward": 10.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 35, 
+                "cum_reward": 7.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 38, 
+                "cum_reward": 3.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 38, 
+                "cum_reward": 1.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 41, 
+                "cum_reward": -5.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 41, 
+                "cum_reward": -8.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 41, 
+                "cum_reward": 0.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 41, 
+                "cum_reward": -5.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": -9.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": -1.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": -3.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": 4.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": 7.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": -7.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 45, 
+                "cum_reward": -7.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 46, 
+                "cum_reward": -10.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 46, 
+                "cum_reward": -7.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 46, 
+                "cum_reward": -3.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 48, 
+                "cum_reward": -13.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 48, 
+                "cum_reward": -22.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 50, 
+                "cum_reward": -6.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 50, 
+                "cum_reward": -1.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 52, 
+                "cum_reward": -0.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 52, 
+                "cum_reward": 4.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 52, 
+                "cum_reward": 2.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 52, 
+                "cum_reward": 17.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 53, 
+                "cum_reward": 5.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 56, 
+                "cum_reward": -9.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 58, 
+                "cum_reward": 1.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 58, 
+                "cum_reward": 10.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 58, 
+                "cum_reward": 1.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 58, 
+                "cum_reward": 6.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 59, 
+                "cum_reward": -3.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 59, 
+                "cum_reward": -4.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 59, 
+                "cum_reward": -15.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 61, 
+                "cum_reward": -8.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 61, 
+                "cum_reward": -2.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 64, 
+                "cum_reward": -9.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 64, 
+                "cum_reward": 1.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 67, 
+                "cum_reward": -4.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 68, 
+                "cum_reward": 11.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 68, 
+                "cum_reward": 0.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 68, 
+                "cum_reward": 6.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 68, 
+                "cum_reward": -4.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 70, 
+                "cum_reward": 10.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 71, 
+                "cum_reward": -3.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 71, 
+                "cum_reward": 5.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 74, 
+                "cum_reward": 1.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 74, 
+                "cum_reward": 1.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 74, 
+                "cum_reward": -2.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 74, 
+                "cum_reward": -6.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": -3.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": -3.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": 2.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": 2.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": 11.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": 0.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": 5.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 75, 
+                "cum_reward": 18.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 76, 
+                "cum_reward": 7.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 76, 
+                "cum_reward": 8.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": -4.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": -8.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": -10.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": -4.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": -2.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": 19.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": 11.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": 4.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": 4.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 77, 
+                "cum_reward": 4.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 78, 
+                "cum_reward": 10.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 78, 
+                "cum_reward": -2.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 79, 
+                "cum_reward": 7.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 81, 
+                "cum_reward": 5.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": 1.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": -0.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": -3.5, 
+                "success": true
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": 2.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": -7.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": 3.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": 5.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 82, 
+                "cum_reward": 7.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 84, 
+                "cum_reward": -6.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 85, 
+                "cum_reward": 15.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 85, 
+                "cum_reward": 7.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 86, 
+                "cum_reward": -0.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 89, 
+                "cum_reward": -2.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 89, 
+                "cum_reward": 1.0, 
+                "success": false
+            }, 
+            {
+                "q_size": 89, 
+                "cum_reward": 11.5, 
+                "success": false
+            }, 
+            {
+                "q_size": 89, 
+                "cum_reward": 0.0, 
+                "success": true
+            }, 
+            {
+                "q_size": 90, 
+                "cum_reward": 3.5, 
+                "success": false
+            }
+        ]
+    }, 
+    "encoding": {
+        "x": {
+            "field": "q_size", 
+            "type": "quantitative"
+        }
+    }
+}
+
+  var embedSpec = {
+    mode: "vega-lite",  // Instruct Vega-Embed to use the Vega-Lite compiler
+    spec: vlSpec
+  };
+
+  // Embed the visualization in the container with id `vis`
+  vg.embed("#vis", embedSpec, function(error, result) {
+    // Callback receiving the View instance and parsed Vega spec
+    // result.view is the View, which resides under the '#vis' element
+  });
+  </script>
+</body>
+</html>

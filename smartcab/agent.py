@@ -5,6 +5,8 @@ from planner import RoutePlanner
 from simulator import Simulator
 import pandas as pd
 from altair import Chart
+import matplotlib.pyplot as plt
+import numpy as np
 
 class RandomAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -59,18 +61,36 @@ class QLearningAgent(Agent):
         self.stats = []
 
     def stats_add_row(self, success):
+        iteration = len(self.stats) + 1
         self.stats.append(
-            (len(self.q_matrix), self.cum_reward, success)
+            (iteration, len(self.q_matrix), self.cum_reward, success)
         )
 
     def stats_print(self):
-        df = pd.DataFrame(data=self.stats, columns=['q_size', 'cum_reward', 'success'])
+        df = pd.DataFrame(data=self.stats, index=self.stats.iteration, columns=['q_size', 'cum_reward', 'success'])
         print df
 
     def stats_save_to_file(self):
-        df = pd.DataFrame(data=self.stats, columns=['q_size', 'cum_reward', 'success'])
-        df.to_csv('stats.csv', sep="\t")
-        print df
+        df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
+        print df[df['iteration']]
+        # # df = pd.DataFrame(data=self.stats, columns=['iter', 'q_size', 'cum_reward', 'success'])
+        # print df
+
+        # chart = Chart(df).mark_point().encode(
+        #     x='q_size',
+        # )
+        #
+        # html = chart.to_html()
+        # with open('chart.html', 'w') as f:
+        #     f.write(html)
+
+        # x = np.random.rand(N)
+        # y = np.random.rand(N)
+        # colors = np.random.rand(N)
+        # area = np.pi * (15 * np.random.rand(N)) ** 2  # 0 to 15 point radiuses
+        #
+        # plt.scatter(x, y, s=area, c=colors, alpha=0.5)
+        # plt.show()
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
