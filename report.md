@@ -70,23 +70,60 @@ total of 384 states at a given time.
 
 <h2>Implement a Q-Learning Driving Agent</h2>
 
-The third task is to implement the Q-Learning algorithm for the driving agent.
+The third task is to implement the Q-Learning algorithm for the driving agent. The
+code corresponding to this agent can be found on the class *QLearningAgent* at the
+file *agent.py*.
 
-The code corresponding to this agent can be found on the class 
-"QLearningAgent" at the file "agent.py".
-
-The values for three important constants should be assigned:
+Before proceeding to the simulation, the values for three important constants should
+be assigned:
 - *alpha_rate (α)*: The learning rate. Determines to what extent the newly acquired 
 information will override the old information.
-- *epsilon_rate (ε)*: The exploration rate. Determines when to explorer or
-when to exploit learned information.
+- *epsilon_rate (ε)*: The exploration rate. Determines when to explore or
+when to exploit the already learn information.
 - *gamma rate (γ)*: The discount factor. Determines the importance of future 
 rewards.
 
-We will execute 100 simulations with enforce_deadline to True. The values for
-the constants will be *alpha_rate (α)* = 0.9, *epsilon_rate (ε)* = 0.1 and
-*gamma rate (γ)* = 0.5. Also in the end of each simulation a report
-with the size 
+We will execute 100 simulations with enforce_deadline to True. We will do our first
+attempt with these values for the constants:
+- *alpha_rate (α)* = 0.9
+- *epsilon_rate (ε)* = 0.1
+- *gamma rate (γ)* = 0.5.
+
+Let's analyze a scatter plot that correlates number of simulations executed (iterations) with
+size of the Q matrix:
+
+![](plots/qlearner_1_scatter_iterations_q-size.png)
+
+As we can see in the plot, as simulations are executed the number of values in Q
+matrix increases. At the beginning increases fast, but later increases slow. This
+is normal because the number of scenarios not visited decreases while simulations
+accumulate.
+
+Let's analyze a scatter plot that correlates number of iterations with accumulated 
+reward for each of the iterations:
+
+![](plots/qlearner_1_scatter_iterations_cum-reward.png)
+
+We don't see that as the number of iterations increase the agent gets better
+accumulated rewards. Maybe the assigned values for the constants were poorly chosen.
+
+Now let's see the number of times q-learner agent has achieved the destination:
+- Success: 21 times
+- Fail: 79 times
+
+In the first section of this report we saw that the random agent normally was
+successfully, but we must consider that the deadline was set to false. To make
+a fairer comparison, lets compare with a random agent with deadline set to true.
+
+Let's see the number of times random agent has achieved the destination:
+- Success: 16 times
+- Fail: 84 times
+
+There is not too much difference between the success ratio of the *RandomAgent* and
+the *QLearningAgent*. As said previously maybe the values for the constants were 
+poorly chosen. Other options are that 100 simulations are not enough for the *QLearningAgent*,
+or maybe the q-learn algorithm is bad implemented.
+
 
 
 

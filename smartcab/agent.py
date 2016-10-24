@@ -17,6 +17,46 @@ class RandomAgent(Agent):
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
 
+        self.cum_reward = 0
+        self.stats = []
+
+    def stats_add_row(self, success):
+        iteration = len(self.stats) + 1
+        self.stats.append(
+            (iteration, self.cum_reward, success)
+        )
+
+    def stats_print(self):
+        df = pd.DataFrame(data=self.stats, columns=['iteration', 'cum_reward', 'success'])
+        print df
+
+    def stats_plot(self):
+        df = pd.DataFrame(data=self.stats, columns=['iteration', 'cum_reward', 'success'])
+        print len(df[df['success'] == True])
+        print len(df[df['success'] == False])
+
+        # x = df['iteration']
+        # y = df['q_size']
+        # plt.scatter(x, y)
+        # plt.xlim([0, max(x)+10])
+        # plt.ylim([0, max(y)+10])
+        # plt.xlabel("Number of iterations")
+        # plt.ylabel("Q size")
+        # plt.show()
+        #
+        # x = df['iteration']
+        # y = df['cum_reward']
+        # plt.scatter(x, y)
+        # plt.xlim([0, max(x)+10])
+        # plt.ylim([min(y)-10, max(y)+10])
+        # plt.xlabel("Number of iterations")
+        # plt.ylabel("Accumulated reward")
+        # plt.show()
+
+        # foo = df.ix[df['success']==True]
+        #
+        # print df['success' == True]
+
     def reset(self, destination=None):
         self.planner.route_to(destination)
 
@@ -32,8 +72,8 @@ class RandomAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
 
-        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}" \
-            . format(deadline, inputs,action, reward)  # [debug]
+        # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs,
+        #                                                                                             action, reward)  # [debug]
 
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -57,7 +97,6 @@ class QLearningAgent(Agent):
         self.previous_action = None
 
         self.cum_reward = 0
-
         self.stats = []
 
     def stats_add_row(self, success):
@@ -67,30 +106,35 @@ class QLearningAgent(Agent):
         )
 
     def stats_print(self):
-        df = pd.DataFrame(data=self.stats, index=self.stats.iteration, columns=['q_size', 'cum_reward', 'success'])
+        df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
         print df
 
-    def stats_save_to_file(self):
+    def stats_plot(self):
         df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
-        print df[df['iteration']]
-        # # df = pd.DataFrame(data=self.stats, columns=['iter', 'q_size', 'cum_reward', 'success'])
-        # print df
+        print len(df[df['success'] == True])
+        print len(df[df['success'] == False])
 
-        # chart = Chart(df).mark_point().encode(
-        #     x='q_size',
-        # )
-        #
-        # html = chart.to_html()
-        # with open('chart.html', 'w') as f:
-        #     f.write(html)
-
-        # x = np.random.rand(N)
-        # y = np.random.rand(N)
-        # colors = np.random.rand(N)
-        # area = np.pi * (15 * np.random.rand(N)) ** 2  # 0 to 15 point radiuses
-        #
-        # plt.scatter(x, y, s=area, c=colors, alpha=0.5)
+        # x = df['iteration']
+        # y = df['q_size']
+        # plt.scatter(x, y)
+        # plt.xlim([0, max(x)+10])
+        # plt.ylim([0, max(y)+10])
+        # plt.xlabel("Number of iterations")
+        # plt.ylabel("Q size")
         # plt.show()
+        #
+        # x = df['iteration']
+        # y = df['cum_reward']
+        # plt.scatter(x, y)
+        # plt.xlim([0, max(x)+10])
+        # plt.ylim([min(y)-10, max(y)+10])
+        # plt.xlabel("Number of iterations")
+        # plt.ylabel("Accumulated reward")
+        # plt.show()
+
+        # foo = df.ix[df['success']==True]
+        #
+        # print df['success' == True]
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -144,13 +188,21 @@ class QLearningAgent(Agent):
         self.state = inputs
         self.state['next_waypoint'] = self.next_waypoint
         self.state = tuple(sorted(self.state.items()))
+        # print "*****"
+        # print self.state
 
         # Select action according to your policy
         action = self.choose_action(self.state)
+        # print action
 
         # Execute action and get reward
         reward = self.env.act(self, action)
         self.cum_reward = self.cum_reward + reward
+
+        # new_state = self.env.sense(self)
+        # new_state = tuple(sorted(new_state.items()))
+        # print new_state
+        # print "********"
 
         # Learn policy based on state, action, reward
         if reward is not None:

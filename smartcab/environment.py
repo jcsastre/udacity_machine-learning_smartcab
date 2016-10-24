@@ -74,9 +74,8 @@ class Environment(object):
         self.primary_agent = agent
         self.enforce_deadline = enforce_deadline
 
-    def print_primary_agent_stats(self):
-        # self.primary_agent.stats_print()
-        self.primary_agent.stats_save_to_file()
+    def plot_primary_agent_stats(self):
+        self.primary_agent.stats_plot()
 
     def reset(self):
         self.done = False

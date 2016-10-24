@@ -105,7 +105,7 @@ class Simulator(object):
             if self.quit:
                 break
 
-        self.env.print_primary_agent_stats()
+        self.env.plot_primary_agent_stats()
 
     def render(self):
         # Clear screen
