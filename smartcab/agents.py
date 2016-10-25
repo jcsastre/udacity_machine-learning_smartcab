@@ -3,8 +3,8 @@ import pandas as pd
 
 from routeplanner import RoutePlanner
 
-from altair import Chart
-import matplotlib.pyplot as plt
+# from altair import Chart
+# import matplotlib.pyplot as plt
 
 class Agent(object):
     """Base class for all agents."""
@@ -131,6 +131,10 @@ class QLearningAgent(Agent):
         self.cum_reward = 0
         self.stats = []
 
+    def stats_report_print(self):
+        for row in self.stats:
+            print row
+
     def stats_add_row(self, success):
         iteration = len(self.stats) + 1
         self.stats.append(
@@ -141,32 +145,32 @@ class QLearningAgent(Agent):
         df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
         print df
 
-    def stats_plot(self):
-        df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
-        print len(df[df['success'] == True])
-        print len(df[df['success'] == False])
-
-        # x = df['iteration']
-        # y = df['q_size']
-        # plt.scatter(x, y)
-        # plt.xlim([0, max(x)+10])
-        # plt.ylim([0, max(y)+10])
-        # plt.xlabel("Number of iterations")
-        # plt.ylabel("Q size")
-        # plt.show()
-        #
-        # x = df['iteration']
-        # y = df['cum_reward']
-        # plt.scatter(x, y)
-        # plt.xlim([0, max(x)+10])
-        # plt.ylim([min(y)-10, max(y)+10])
-        # plt.xlabel("Number of iterations")
-        # plt.ylabel("Accumulated reward")
-        # plt.show()
-
-        # foo = df.ix[df['success']==True]
-        #
-        # print df['success' == True]
+    # def stats_plot(self):
+    #     df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
+    #     print len(df[df['success'] == True])
+    #     print len(df[df['success'] == False])
+    #
+    #     # x = df['iteration']
+    #     # y = df['q_size']
+    #     # plt.scatter(x, y)
+    #     # plt.xlim([0, max(x)+10])
+    #     # plt.ylim([0, max(y)+10])
+    #     # plt.xlabel("Number of iterations")
+    #     # plt.ylabel("Q size")
+    #     # plt.show()
+    #     #
+    #     # x = df['iteration']
+    #     # y = df['cum_reward']
+    #     # plt.scatter(x, y)
+    #     # plt.xlim([0, max(x)+10])
+    #     # plt.ylim([min(y)-10, max(y)+10])
+    #     # plt.xlabel("Number of iterations")
+    #     # plt.ylabel("Accumulated reward")
+    #     # plt.show()
+    #
+    #     # foo = df.ix[df['success']==True]
+    #     #
+    #     # print df['success' == True]
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
