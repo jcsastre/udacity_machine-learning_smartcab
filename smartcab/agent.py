@@ -1,7 +1,7 @@
 # coding=utf-8
 import random
-from environment import Agent, Environment
-from planner import RoutePlanner
+from Environment import Agent, Environment
+from RoutePlanner import RoutePlanner
 from simulator import Simulator
 import pandas as pd
 from altair import Chart

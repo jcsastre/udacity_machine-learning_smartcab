@@ -1,27 +1,7 @@
-import time
 import random
 from collections import OrderedDict
 
-from simulator import Simulator
-
-class TrafficLight(object):
-    """A traffic light that switches periodically."""
-
-    valid_states = [True, False]  # True = NS open, False = EW open
-
-    def __init__(self, state=None, period=None):
-        self.state = state if state is not None else random.choice(self.valid_states)
-        self.period = period if period is not None else random.choice([3, 4, 5])
-        self.last_updated = 0
-
-    def reset(self):
-        self.last_updated = 0
-
-    def update(self, t):
-        if t - self.last_updated >= self.period:
-            self.state = not self.state  # assuming state is boolean
-            self.last_updated = t
-
+from TrafficLight import TrafficLight
 
 class Environment(object):
     """Environment within which all agents operate."""
@@ -230,58 +210,3 @@ class Environment(object):
         """L1 distance between two points."""
         return abs(b[0] - a[0]) + abs(b[1] - a[1])
 
-
-class Agent(object):
-    """Base class for all agents."""
-
-    def __init__(self, env):
-        self.env = env
-        self.state = None
-        self.next_waypoint = None
-        self.color = 'cyan'
-
-    def reset(self, destination=None):
-        pass
-
-    def get_cum_reward(self):
-        pass
-
-    def update(self, t):
-        pass
-
-    def get_state(self):
-        return self.state
-
-    def get_next_waypoint(self):
-        return self.next_waypoint
-
-
-class DummyAgent(Agent):
-    color_choices = ['blue', 'cyan', 'magenta', 'orange']
-
-    def __init__(self, env):
-        super(DummyAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
-        self.next_waypoint = random.choice(Environment.valid_actions[1:])
-        self.color = random.choice(self.color_choices)
-
-    def update(self, t):
-        inputs = self.env.sense(self)
-
-        action_okay = True
-        if self.next_waypoint == 'right':
-            if inputs['light'] == 'red' and inputs['left'] == 'forward':
-                action_okay = False
-        elif self.next_waypoint == 'forward':
-            if inputs['light'] == 'red':
-                action_okay = False
-        elif self.next_waypoint == 'left':
-            if inputs['light'] == 'red' or (inputs['oncoming'] == 'forward' or inputs['oncoming'] == 'right'):
-                action_okay = False
-
-        action = None
-        if action_okay:
-            action = self.next_waypoint
-            self.next_waypoint = random.choice(Environment.valid_actions[1:])
-        reward = self.env.act(self, action)
-        #print "DummyAgent.update(): t = {}, inputs = {}, action = {}, reward = {}".format(t, inputs, action, reward)  # [debug]
-        #print "DummyAgent.update(): next_waypoint = {}".format(self.next_waypoint)  # [debug]
