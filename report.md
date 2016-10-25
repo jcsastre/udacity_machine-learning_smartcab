@@ -145,4 +145,7 @@ the number of negative rewards should decrease with time.
 <!--2. The smartcab never receives a negative reward because now information about-->
 <!--light and other cars is taken into account before executing any action.-->
 
+<h2>Improve the Q-Learning Driving Agent</h2>
+
+Now let's tune the values for *learning rate (alpha)*, *the discount factor (gamma)* and the *exploration rate (epsilon)*. We will perform many simulations with many combinations of these parameters, and the we will report the results to see what is the best combination.
 

@@ -87,25 +87,24 @@ class RandomAgent(Agent):
         print len(df[df['success'] == True])
         print len(df[df['success'] == False])
 
+    def reset(self, destination=None):
+        self.planner.route_to(destination)
 
-def reset(self, destination=None):
-    self.planner.route_to(destination)
 
+    def update(self, t):
+        # Gather inputs
+        self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
+        inputs = self.env.sense(self)
+        deadline = self.env.get_deadline(self)
 
-def update(self, t):
-    # Gather inputs
-    self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
-    inputs = self.env.sense(self)
-    deadline = self.env.get_deadline(self)
+        # Random update of the state
+        action = random.choice([None, 'forward', 'left', 'right'])
 
-    # Random update of the state
-    action = random.choice([None, 'forward', 'left', 'right'])
+        # Execute action and get reward
+        reward = self.env.act(self, action)
 
-    # Execute action and get reward
-    reward = self.env.act(self, action)
-
-    # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs,
-    #                                                                                             action, reward)  # [debug]
+        # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs,
+        #                                                                                             action, reward)  # [debug]
 
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -131,9 +130,21 @@ class QLearningAgent(Agent):
         self.cum_reward = 0
         self.stats = []
 
-    def stats_report_print(self):
+    def stats_get_aggregated(self):
+        iterationsCount = 0
+        successCount = 0
+
         for row in self.stats:
-            print row
+            iterationsCount += 1
+            if row[3]:
+                successCount += 1
+
+        stats = {
+            'iterationsCount': iterationsCount,
+            'successCount': successCount
+        }
+
+        return stats
 
     def stats_add_row(self, success):
         iteration = len(self.stats) + 1
