@@ -130,18 +130,29 @@ class QLearningAgent(Agent):
         self.cum_reward = 0
         self.stats = []
 
+        self.actions_count = 0
+
     def stats_get_aggregated(self):
-        iterationsCount = 0
-        successCount = 0
+        iterations_count = 0
+        success_count = 0
+        actions_count = 0
+        cum_reward_total = 0
 
         for row in self.stats:
-            iterationsCount += 1
+            iterations_count += 1
             if row[3]:
-                successCount += 1
+                success_count += 1
+            actions_count = actions_count + row[4]
+            cum_reward_total = cum_reward_total + row[2]
+
+        avg_actions = actions_count / iterations_count
+        avg_cum_reward = cum_reward_total / iterations_count
 
         stats = {
-            'iterationsCount': iterationsCount,
-            'successCount': successCount
+            'iterationsCount': iterations_count,
+            'successCount': success_count,
+            'actionsAvg': avg_actions,
+            'cumRewardAvg': avg_cum_reward
         }
 
         return stats
@@ -149,12 +160,8 @@ class QLearningAgent(Agent):
     def stats_add_row(self, success):
         iteration = len(self.stats) + 1
         self.stats.append(
-            (iteration, len(self.q_matrix), self.cum_reward, success)
+            (iteration, len(self.q_matrix), self.cum_reward, success, self.actions_count)
         )
-
-    def stats_print(self):
-        df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
-        print df
 
     # def stats_plot(self):
     #     df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
@@ -191,6 +198,8 @@ class QLearningAgent(Agent):
         self.previous_action = None
 
         self.cum_reward = 0
+
+        self.actions_count = 0
 
     def get_cum_reward(self):
         return self.cum_reward
@@ -235,21 +244,14 @@ class QLearningAgent(Agent):
         self.state = inputs
         self.state['next_waypoint'] = self.next_waypoint
         self.state = tuple(sorted(self.state.items()))
-        # print "*****"
-        # print self.state
 
         # Select action according to your policy
         action = self.choose_action(self.state)
-        # print action
 
         # Execute action and get reward
         reward = self.env.act(self, action)
         self.cum_reward = self.cum_reward + reward
-
-        # new_state = self.env.sense(self)
-        # new_state = tuple(sorted(new_state.items()))
-        # print new_state
-        # print "********"
+        self.actions_count += 1
 
         # Learn policy based on state, action, reward
         if reward is not None:
@@ -261,29 +263,3 @@ class QLearningAgent(Agent):
 
         # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, q_size = {}".format(
         #     deadline, inputs, action, reward, len(self.q_matrix))  # [debug]
-
-# def run():
-#     """Run the agent for a finite number of trials."""
-#
-#     # df = pd.DataFrame(columns=['q_size', 'cum_reward'])
-#     # df = df.append([{'q_size': 3, 'cum_reward': 2}])
-#     # print df
-#     # quit()
-#
-#     # Set up environment and agent
-#     e = Environment()  # create environment (also adds some dummy traffic)
-#     a = e.create_agent(RandomAgent)  # create agent
-#     e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
-#     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
-#
-#     # Now simulate it
-#     sim = Simulator(e, update_delay=0.001, display=False)  # create simulator (uses pygame when display=True,
-#     # if available)
-#     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
-#
-#     sim.run(n_trials=1)  # run for a specified number of trials
-#     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
-#
-#
-# if __name__ == '__main__':
-#     run()
