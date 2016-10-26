@@ -120,7 +120,7 @@ class QLearningAgent(Agent):
 
         self.alpha = alpha_rate  # Learning rate
         self.epsilon = epsilon_rate  # Exploration rate
-        self.gamma = gamma_rate # Discount factor rate
+        self.gamma = gamma_rate  # Discount factor rate
         self.q_init_value = q_init_value  # Initial value for the q matrix
 
         self.q_matrix = {}
@@ -130,12 +130,14 @@ class QLearningAgent(Agent):
 
         self.cum_reward = 0
         self.stats = []
-        self.stats_by_iteration = []
+        self.stats_by_simulation = []
 
         self.actions_count = 0
         self.traffic_violations_count = 0
 
         self.debug_traces = debug_traces
+
+        self.moves_available = 0
 
     # def stats_get_aggregated(self):
     #     iterations_count = 0
@@ -162,31 +164,33 @@ class QLearningAgent(Agent):
     #
     #     return stats
 
-    def stats_by_iteration_add_row(self, success):
+    def stats_by_simulation_add_row(self, success):
         row = {
-            'iteration': len(self.stats_by_iteration) + 1,
+            'simulation_round': len(self.stats_by_simulation) + 1,
             'success': success,
             'cum_reward': self.cum_reward,
             'explored_states_cum': len(self.q_matrix),
             'traffic_violations_count': self.traffic_violations_count,
-            'actions_count': self.actions_count
+            'actions_count': self.actions_count,
+            'moves_available': self.moves_available
         }
 
-        self.stats_by_iteration.append(row)
+        self.stats_by_simulation.append(row)
 
-    def stats_by_iteration_get(self):
-        return self.stats_by_iteration
+    def stats_by_simulation_get(self):
+        return self.stats_by_simulation
 
-    def stats_by_iteration_get_as_df(self):
+    def stats_by_simulation_get_as_df(self):
         df = pd.DataFrame(
-            data=self.stats_by_iteration,
+            data=self.stats_by_simulation,
             columns=[
-                'iteration',
+                'simulation_round',
                 'success',
                 'cum_reward',
                 'explored_states_cum',
-                'traffic_violations_count'
-                'actions_count'
+                'traffic_violations_count',
+                'actions_count',
+                'moves_available'
             ]
         )
 
@@ -195,7 +199,7 @@ class QLearningAgent(Agent):
     def stats_add_row(self, success):
         iteration = len(self.stats) + 1
         self.stats.append(
-            (iteration, len(self.q_matrix), self.cum_reward, success, self.actions_count)
+            (iteration, len(self.q_matrix), self.cum_reward, success, self.actions_count, self.moves_available)
         )
 
     def reset(self, destination=None):
@@ -209,6 +213,8 @@ class QLearningAgent(Agent):
 
         self.actions_count = 0
         self.traffic_violations_count = 0
+
+        self.moves_available = 0
 
     def get_cum_reward(self):
         return self.cum_reward
@@ -275,6 +281,8 @@ class QLearningAgent(Agent):
         reward = self.env.act(self, action)
 
         # Code for stats purpose - BEGIN
+        if self.moves_available == 0:
+            self.moves_available = deadline
         self.actions_count += 1
         if reward == -1.0:
             self.traffic_violations_count += 1

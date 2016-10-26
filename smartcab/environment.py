@@ -127,12 +127,12 @@ class Environment(object):
                 self.done = True
                 if self.debug_traces:
                     print "\t*** Environment.step(): Primary agent hit hard time limit ({})! Trial aborted. ***".format(self.hard_time_limit)
-                self.primary_agent.stats_by_iteration_add_row(False)
+                self.primary_agent.stats_by_simulation_add_row(False)
             elif self.enforce_deadline and agent_deadline <= 0:
                 self.done = True
                 if self.debug_traces:
                     print "\t*** Environment.step(): Primary agent ran out of time! Trial aborted. ***"
-                self.primary_agent.stats_by_iteration_add_row(False)
+                self.primary_agent.stats_by_simulation_add_row(False)
                 # self.primary_agent.stats_save_to_file()
 
                 # print "LearningAgent stats: q_values_count = {}, reward_cum = {}".format(0,
@@ -223,7 +223,7 @@ class Environment(object):
                 self.done = True
                 if self.debug_traces:
                     print "\t*** Environment.act(): Primary agent has reached destination! ***" # [debug]
-                self.primary_agent.stats_by_iteration_add_row(True)
+                self.primary_agent.stats_by_simulation_add_row(True)
             self.status_text = "state: {}\naction: {}\nreward: {}".format(agent.get_state(), action, reward)
             #print "Environment.act() [POST]: location: {}, heading: {}, action: {}, reward: {}".format(location, heading, action, reward)  # [debug]
 

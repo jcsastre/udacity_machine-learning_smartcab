@@ -7,11 +7,9 @@ import numpy as np
 stats = []
 
 n_trials = 10
-threshold = n_trials / 10
+threshold = 1
 
 def aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rate, stats_by_iteration):
-    stats_sliced = stats_by_iteration[n_trials-threshold:]
-
     iterations_count = 0
     success_count = 0
     traffic_violations_count = 0
@@ -19,7 +17,7 @@ def aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rat
     reward_count = 0
     actions_count = 0
 
-    for iteration_stats in stats_sliced:
+    for iteration_stats in stats_by_iteration:
         iterations_count += 1
         if iteration_stats['success']:
             success_count += 1
@@ -43,14 +41,15 @@ def aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rat
     stats.append(row)
 
 
-q_init_values = [0.0, 5.0, 10]
-samples_to_generate = 3
 
-for q_init_value in q_init_values:
-    for alpha_rate in np.linspace(0.00, 1.00, num=samples_to_generate):
-        for epsilon_rate in np.linspace(0.00, 1.00, num=samples_to_generate):
-            for gamma_rate in np.linspace(0.00, 1.00, num=samples_to_generate):
-                print "Simulating for q_init_value: {}, alpha_rate: {}, epsilon_rate: {}, gamma_rate: {}". \
+samples_to_generate = 5
+
+
+for q_init_value in [0.0, 1.0, 2.0]:
+    for alpha_rate in [0.15, 0.20, 0.25, 0.30, 0.35]:
+        for epsilon_rate in [0.00, 0.05, 0.10, 0.15, 0.20]:
+            for gamma_rate in [0.80, 0.85, 0.90, 0.95, 1.00]:
+                print "Simulating for q_init_value: {}, alpha_rate: {}, epsilon_rate: {}, gamma_rate: {}" . \
                     format(q_init_value, alpha_rate, epsilon_rate, gamma_rate)
                 e = Environment()
                 a = QLearningAgent(
@@ -59,7 +58,7 @@ for q_init_value in q_init_values:
                 )
                 e.set_primary_agent(a, enforce_deadline=True)
                 s = Simulator(e, update_delay=0.0000001, display=False)
-                s.run(n_trials=n_trials)
+                s.run(n_trials=10)
 
                 stats_by_iteration = a.stats_by_simulation_get()
                 aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rate, stats_by_iteration)
@@ -69,4 +68,4 @@ df = pd.DataFrame(
                          'traffic_violations_avg', 'explored_states_avg', 'reward_cum_avg', 'actions_avg']
 )
 
-df.to_csv('qlearn_agent_tuning_results.csv')
+df.to_csv('qlearn_agent_tuning_results2.csv')
