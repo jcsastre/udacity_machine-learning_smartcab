@@ -28,7 +28,7 @@ class Environment(object):
     valid_headings = [(1, 0), (0, -1), (-1, 0), (0, 1)]  # ENWS
     hard_time_limit = -100  # even if enforce_deadline is False, end trial when deadline reaches this value (to avoid deadlocks)
 
-    def __init__(self, num_dummies=3):
+    def __init__(self, num_dummies=3, debug_traces=False):
         self.num_dummies = num_dummies  # no. of dummy agents
         
         # Initialize simulation variables
@@ -61,6 +61,8 @@ class Environment(object):
         # Primary agent and associated parameters
         self.primary_agent = None  # to be set explicitly
         self.enforce_deadline = False
+
+        self.debug_traces = debug_traces
 
     def create_agent(self, agent_class, *args, **kwargs):
         agent = agent_class(self, *args, **kwargs)
@@ -123,12 +125,14 @@ class Environment(object):
             agent_deadline = self.agent_states[self.primary_agent]['deadline']
             if agent_deadline <= self.hard_time_limit:
                 self.done = True
-                print "\t*** Environment.step(): Primary agent hit hard time limit ({})! Trial aborted. ***".format(self.hard_time_limit)
-                self.primary_agent.stats_iteration_add_row(False)
+                if self.debug_traces:
+                    print "\t*** Environment.step(): Primary agent hit hard time limit ({})! Trial aborted. ***".format(self.hard_time_limit)
+                self.primary_agent.stats_by_iteration_add_row(False)
             elif self.enforce_deadline and agent_deadline <= 0:
                 self.done = True
-                print "\t*** Environment.step(): Primary agent ran out of time! Trial aborted. ***"
-                self.primary_agent.stats_iteration_add_row(False)
+                if self.debug_traces:
+                    print "\t*** Environment.step(): Primary agent ran out of time! Trial aborted. ***"
+                self.primary_agent.stats_by_iteration_add_row(False)
                 # self.primary_agent.stats_save_to_file()
 
                 # print "LearningAgent stats: q_values_count = {}, reward_cum = {}".format(0,
@@ -217,8 +221,9 @@ class Environment(object):
                 if state['deadline'] >= 0:
                     reward += 10  # bonus
                 self.done = True
-                print "\t*** Environment.act(): Primary agent has reached destination! ***" # [debug]
-                self.primary_agent.stats_iteration_add_row(True)
+                if self.debug_traces:
+                    print "\t*** Environment.act(): Primary agent has reached destination! ***" # [debug]
+                self.primary_agent.stats_by_iteration_add_row(True)
             self.status_text = "state: {}\naction: {}\nreward: {}".format(agent.get_state(), action, reward)
             #print "Environment.act() [POST]: location: {}, heading: {}, action: {}, reward: {}".format(location, heading, action, reward)  # [debug]
 

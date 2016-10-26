@@ -6,10 +6,48 @@ import numpy as np
 
 stats = []
 
-q_init_values = [0.0, 2.0, 4.0, 8.0, 16.0]
+def aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rate, stats_by_iteration):
+    iterations_count = 0
+    success_count = 0
+    traffic_violations_count = 0
+    explored_states_cum = 0
+    reward_count = 0
+    actions_count = 0
 
-samples_to_generate = 21
-n_trials = 100
+    for iteration_stats in stats_by_iteration:
+        iterations_count += 1
+        if iteration_stats['success']:
+            success_count += 1
+        traffic_violations_count = traffic_violations_count + iteration_stats['traffic_violations_count']
+        explored_states_cum = explored_states_cum + iteration_stats['explored_states_cum']
+        reward_count = reward_count + iteration_stats['cum_reward']
+        actions_count = actions_count + iteration_stats['actions_count']
+
+    row = {
+        'q_init_value': q_init_value,
+        'alpha_rate': alpha_rate,
+        'epsilon_rate': epsilon_rate,
+        'gamma_rate': gamma_rate,
+        'successPerc': (float(success_count) / float(iterations_count)) * 100,
+        'trafficViolationsAvg': float(traffic_violations_count) / float(iterations_count),
+        'exploredStatesAvg': float(explored_states_cum) / float(iterations_count),
+        'cumRewardAvg': float(reward_count) / float(iterations_count),
+        'actionsAvg': float(actions_count) / float(iterations_count),
+    }
+
+    stats.append(row)
+
+
+
+# q_init_values = [0.0, 2.0, 4.0, 8.0, 16.0]
+#q_init_values = [0.0, 5.0, 10.0]
+q_init_values = [0.0, 5.0]
+
+# samples_to_generate = 21
+# samples_to_generate = 11
+samples_to_generate = 2
+
+n_trials = 5
 
 for q_init_value in q_init_values:
     for alpha_rate in np.linspace(0.00, 1.00, num=samples_to_generate):
@@ -24,31 +62,40 @@ for q_init_value in q_init_values:
                 )
                 e.set_primary_agent(a, enforce_deadline=True)
                 s = Simulator(e, update_delay=0.0000001, display=False)
-                s.run(n_trials=n_trials)
+                s.run(n_trials=10)
 
-                iteration_stats_aggregated = a.stats_get_aggregated()
+                stats_by_iteration = a.stats_by_iteration_get()
+                aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rate, stats_by_iteration)
 
-                success_rate = \
-                    float(iteration_stats_aggregated['successCount']) / float(iteration_stats_aggregated['iterationsCount'])
-                success_perc = int(success_rate * 100)
 
-                row = {
-                    'alpha_rate': alpha_rate,
-                    'epsilon_rate': epsilon_rate,
-                    'gamma_rate': gamma_rate,
-                    # 'successRate': str(iteration_stats_aggregated['successCount']) + "/" + str(
-                    #     iteration_stats_aggregated['iterationsCount']),
-                    'successPerc': success_perc,
-                    'actionsAvg': iteration_stats_aggregated['actionsAvg'],
-                    'cumRewardAvg': iteration_stats_aggregated['cumRewardAvg']
-                    # 'iterationsCount': iteration_stats_aggregated['iterationsCount'],
-                    # 'successCount': iteration_stats_aggregated['successCount'],
-                }
 
-                stats.append(row)
+                # iteration_stats_aggregated = a.stats_get_aggregated()
+
+                # success_rate = \
+                #     float(iteration_stats_aggregated['successCount']) / float(iteration_stats_aggregated['iterationsCount'])
+                # success_perc = int(success_rate * 100)
+                #
+                # row = {
+                #     'alpha_rate': alpha_rate,
+                #     'epsilon_rate': epsilon_rate,
+                #     'gamma_rate': gamma_rate,
+                #     # 'successRate': str(iteration_stats_aggregated['successCount']) + "/" + str(
+                #     #     iteration_stats_aggregated['iterationsCount']),
+                #     'successPerc': success_perc,
+                #     'actionsAvg': iteration_stats_aggregated['actionsAvg'],
+                #     'cumRewardAvg': iteration_stats_aggregated['cumRewardAvg']
+                #     # 'iterationsCount': iteration_stats_aggregated['iterationsCount'],
+                #     # 'successCount': iteration_stats_aggregated['successCount'],
+                # }
+                #
+                # stats.append(row)
+
 
 df = pd.DataFrame(
-    data=stats, columns=['alpha_rate', 'epsilon_rate', 'gamma_rate', 'successPerc', 'actionsAvg', 'cumRewardAvg']
+    data=stats, columns=['q_init_value', 'alpha_rate', 'epsilon_rate', 'gamma_rate', 'successPerc',
+                         'trafficViolationsAvg', 'exploredStatesAvg', 'cumRewardAvg', 'actionsAvg']
 )
 
-df.to_csv('qlearn_agent_tuning_results.csv')
+print df
+
+# df.to_csv('qlearn_agent_tuning_results.csv')

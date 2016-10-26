@@ -109,7 +109,7 @@ class RandomAgent(Agent):
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
-    def __init__(self, env, alpha_rate=0.9, epsilon_rate=0.1, gamma_rate=0.5, q_init_value=0.0):
+    def __init__(self, env, alpha_rate=0.9, epsilon_rate=0.1, gamma_rate=0.5, q_init_value=0.0, debug_traces=False):
         # sets self.env = env, state = None, next_waypoint = None, and a default color
         super(QLearningAgent, self).__init__(env)
 
@@ -130,56 +130,63 @@ class QLearningAgent(Agent):
 
         self.cum_reward = 0
         self.stats = []
-        self.stats_iteration = []
+        self.stats_by_iteration = []
 
         self.actions_count = 0
         self.traffic_violations_count = 0
 
-    def stats_get_aggregated(self):
-        iterations_count = 0
-        success_count = 0
-        actions_count = 0
-        cum_reward_total = 0
+        self.debug_traces = debug_traces
 
-        for row in self.stats:
-            iterations_count += 1
-            if row[3]:
-                success_count += 1
-            actions_count = actions_count + row[4]
-            cum_reward_total = cum_reward_total + row[2]
+    # def stats_get_aggregated(self):
+    #     iterations_count = 0
+    #     success_count = 0
+    #     actions_count = 0
+    #     cum_reward_total = 0
+    #
+    #     for row in self.stats:
+    #         iterations_count += 1
+    #         if row[3]:
+    #             success_count += 1
+    #         actions_count = actions_count + row[4]
+    #         cum_reward_total = cum_reward_total + row[2]
+    #
+    #     avg_actions = actions_count / iterations_count
+    #     avg_cum_reward = cum_reward_total / iterations_count
+    #
+    #     stats = {
+    #         'iterationsCount': iterations_count,
+    #         'successCount': success_count,
+    #         'actionsAvg': avg_actions,
+    #         'cumRewardAvg': avg_cum_reward
+    #     }
+    #
+    #     return stats
 
-        avg_actions = actions_count / iterations_count
-        avg_cum_reward = cum_reward_total / iterations_count
-
-        stats = {
-            'iterationsCount': iterations_count,
-            'successCount': success_count,
-            'actionsAvg': avg_actions,
-            'cumRewardAvg': avg_cum_reward
-        }
-
-        return stats
-
-    def stats_iteration_add_row(self, success):
+    def stats_by_iteration_add_row(self, success):
         row = {
-            'iteration': len(self.stats_iteration) + 1,
+            'iteration': len(self.stats_by_iteration) + 1,
             'success': success,
             'cum_reward': self.cum_reward,
             'explored_states_cum': len(self.q_matrix),
-            'traffic_violations_count': self.traffic_violations_count
+            'traffic_violations_count': self.traffic_violations_count,
+            'actions_count': self.actions_count
         }
 
-        self.stats_iteration.append(row)
+        self.stats_by_iteration.append(row)
 
-    def stats_iteration_get_as_df(self):
+    def stats_by_iteration_get(self):
+        return self.stats_by_iteration
+
+    def stats_by_iteration_get_as_df(self):
         df = pd.DataFrame(
-            data=self.stats_iteration,
+            data=self.stats_by_iteration,
             columns=[
                 'iteration',
                 'success',
                 'cum_reward',
                 'explored_states_cum',
                 'traffic_violations_count'
+                'actions_count'
             ]
         )
 
@@ -282,5 +289,6 @@ class QLearningAgent(Agent):
         self.previous_state = self.state
         self.previous_action = action
 
-        print "\tLearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}" . \
-            format(deadline, inputs, action, reward)  # [debug]
+        if self.debug_traces:
+            print "\tLearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}" . \
+                format(deadline, inputs, action, reward)  # [debug]
