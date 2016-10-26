@@ -109,7 +109,7 @@ class RandomAgent(Agent):
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
-    def __init__(self, env, alpha_rate=0.9, epsilon_rate=0.1, gamma_rate=0.5):
+    def __init__(self, env, alpha_rate=0.9, epsilon_rate=0.1, gamma_rate=0.5, q_init_value=0.0):
         # sets self.env = env, state = None, next_waypoint = None, and a default color
         super(QLearningAgent, self).__init__(env)
 
@@ -121,6 +121,7 @@ class QLearningAgent(Agent):
         self.alpha = alpha_rate  # Learning rate
         self.epsilon = epsilon_rate  # Exploration rate
         self.gamma = gamma_rate # Discount factor rate
+        self.q_init_value = q_init_value  # Initial value for the q matrix
 
         self.q_matrix = {}
 
@@ -206,7 +207,7 @@ class QLearningAgent(Agent):
 
     def get_q_value(self, state, action):
         key = (state, action)
-        return self.q_matrix.get(key, 0.0)
+        return self.q_matrix.get(key, self.q_init_value)
 
     def choose_action(self, state):
         if random.random() < self.epsilon:  # explore
@@ -226,13 +227,27 @@ class QLearningAgent(Agent):
         return action
 
     def learn(self, previous_state, previous_action, reward, state):
-        old_q_value = self.q_matrix.get((previous_state, previous_action), None)
-        if old_q_value is None:
-            self.q_matrix[(previous_state, previous_action)] = reward
-        else:
-            max_q_new = max([self.get_q_value(state, a) for a in self.valid_actions])
-            learned_value = reward + self.gamma * max_q_new
-            self.q_matrix[(previous_state, previous_action)] = old_q_value + self.alpha * (learned_value - old_q_value)
+        # Please, notice that get_q_value returns 0.0 is no Q-value found, this is equivalent to set initial condition
+        # for Q-matrix
+        old_q_value = self.get_q_value(previous_state, previous_action)
+
+        max_q_new = max([self.get_q_value(state, a) for a in self.valid_actions])
+
+        learned_value = reward + self.gamma * max_q_new
+
+        new_q_value = old_q_value + self.alpha * (learned_value - old_q_value)
+
+        self.q_matrix[(previous_state, previous_action)] = new_q_value
+
+    # Old version of learn method
+    # def learn(self, previous_state, previous_action, reward, state):
+    #     old_q_value = self.q_matrix.get((previous_state, previous_action), None)
+    #     if old_q_value is None:
+    #         self.q_matrix[(previous_state, previous_action)] = reward
+    #     else:
+    #         max_q_new = max([self.get_q_value(state, a) for a in self.valid_actions])
+    #         learned_value = reward + self.gamma * max_q_new
+    #         self.q_matrix[(previous_state, previous_action)] = old_q_value + self.alpha * (learned_value - old_q_value)
 
     def update(self, t):
         # Gather inputs
