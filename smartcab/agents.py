@@ -103,8 +103,8 @@ class RandomAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
 
-        # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs,
-        #                                                                                             action, reward)  # [debug]
+        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}" . \
+            format(deadline, inputs, action, reward)
 
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -130,8 +130,10 @@ class QLearningAgent(Agent):
 
         self.cum_reward = 0
         self.stats = []
+        self.stats_iteration = []
 
         self.actions_count = 0
+        self.traffic_violations_count = 0
 
     def stats_get_aggregated(self):
         iterations_count = 0
@@ -158,38 +160,36 @@ class QLearningAgent(Agent):
 
         return stats
 
+    def stats_iteration_add_row(self, success):
+        row = {
+            'iteration': len(self.stats_iteration) + 1,
+            'success': success,
+            'cum_reward': self.cum_reward,
+            'explored_states_cum': len(self.q_matrix),
+            'traffic_violations_count': self.traffic_violations_count
+        }
+
+        self.stats_iteration.append(row)
+
+    def stats_iteration_get_as_df(self):
+        df = pd.DataFrame(
+            data=self.stats_iteration,
+            columns=[
+                'iteration',
+                'success',
+                'cum_reward',
+                'explored_states_cum',
+                'traffic_violations_count'
+            ]
+        )
+
+        return df
+
     def stats_add_row(self, success):
         iteration = len(self.stats) + 1
         self.stats.append(
             (iteration, len(self.q_matrix), self.cum_reward, success, self.actions_count)
         )
-
-    # def stats_plot(self):
-    #     df = pd.DataFrame(data=self.stats, columns=['iteration', 'q_size', 'cum_reward', 'success'])
-    #     print len(df[df['success'] == True])
-    #     print len(df[df['success'] == False])
-    #
-    #     # x = df['iteration']
-    #     # y = df['q_size']
-    #     # plt.scatter(x, y)
-    #     # plt.xlim([0, max(x)+10])
-    #     # plt.ylim([0, max(y)+10])
-    #     # plt.xlabel("Number of iterations")
-    #     # plt.ylabel("Q size")
-    #     # plt.show()
-    #     #
-    #     # x = df['iteration']
-    #     # y = df['cum_reward']
-    #     # plt.scatter(x, y)
-    #     # plt.xlim([0, max(x)+10])
-    #     # plt.ylim([min(y)-10, max(y)+10])
-    #     # plt.xlabel("Number of iterations")
-    #     # plt.ylabel("Accumulated reward")
-    #     # plt.show()
-    #
-    #     # foo = df.ix[df['success']==True]
-    #     #
-    #     # print df['success' == True]
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -201,6 +201,7 @@ class QLearningAgent(Agent):
         self.cum_reward = 0
 
         self.actions_count = 0
+        self.traffic_violations_count = 0
 
     def get_cum_reward(self):
         return self.cum_reward
@@ -265,8 +266,13 @@ class QLearningAgent(Agent):
 
         # Execute action and get reward
         reward = self.env.act(self, action)
-        self.cum_reward = self.cum_reward + reward
+
+        # Code for stats purpose - BEGIN
         self.actions_count += 1
+        if reward == -1.0:
+            self.traffic_violations_count += 1
+        self.cum_reward = self.cum_reward + reward
+        # Code for stats purpose - END
 
         # Learn policy based on state, action, reward
         if reward is not None:
@@ -276,5 +282,5 @@ class QLearningAgent(Agent):
         self.previous_state = self.state
         self.previous_action = action
 
-        # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, q_size = {}".format(
-        #     deadline, inputs, action, reward, len(self.q_matrix))  # [debug]
+        print "\tLearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}" . \
+            format(deadline, inputs, action, reward)  # [debug]
