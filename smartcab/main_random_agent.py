@@ -1,6 +1,6 @@
-from smartcab.simulator import Simulator
-from smartcab.environment import Environment
-from smartcab.agents import RandomAgent
+from simulator import Simulator
+from environment import Environment
+from agents import RandomAgent
 
 environment = Environment()
 random_agent = RandomAgent(environment)

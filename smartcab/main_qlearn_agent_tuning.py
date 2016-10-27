@@ -6,7 +6,7 @@ import numpy as np
 
 stats = []
 
-n_trials = 10
+n_trials = 100
 threshold = n_trials / 10
 
 def aggregated_stats_build_row(q_init_value, alpha_rate, epsilon_rate, gamma_rate, stats_by_iteration):
@@ -69,4 +69,4 @@ df = pd.DataFrame(
                          'traffic_violations_avg', 'explored_states_avg', 'reward_cum_avg', 'actions_avg']
 )
 
-df.to_csv('qlearn_agent_tuning_results.csv')
+df.to_csv('qlearn_agent_tuning_results_3_samples.csv')

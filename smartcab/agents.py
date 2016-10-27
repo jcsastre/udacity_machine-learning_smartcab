@@ -109,7 +109,7 @@ class RandomAgent(Agent):
 class QLearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
-    def __init__(self, env, alpha_rate=0.9, epsilon_rate=0.1, gamma_rate=0.5, q_init_value=0.0, debug_traces=False):
+    def __init__(self, env, alpha_rate=0.7, epsilon_rate=0.9, gamma_rate=0.5, q_init_value=10.0, debug_traces=False):
         # sets self.env = env, state = None, next_waypoint = None, and a default color
         super(QLearningAgent, self).__init__(env)
 
@@ -137,33 +137,6 @@ class QLearningAgent(Agent):
 
         self.debug_traces = debug_traces
 
-        self.moves_available = 0
-
-    # def stats_get_aggregated(self):
-    #     iterations_count = 0
-    #     success_count = 0
-    #     actions_count = 0
-    #     cum_reward_total = 0
-    #
-    #     for row in self.stats:
-    #         iterations_count += 1
-    #         if row[3]:
-    #             success_count += 1
-    #         actions_count = actions_count + row[4]
-    #         cum_reward_total = cum_reward_total + row[2]
-    #
-    #     avg_actions = actions_count / iterations_count
-    #     avg_cum_reward = cum_reward_total / iterations_count
-    #
-    #     stats = {
-    #         'iterationsCount': iterations_count,
-    #         'successCount': success_count,
-    #         'actionsAvg': avg_actions,
-    #         'cumRewardAvg': avg_cum_reward
-    #     }
-    #
-    #     return stats
-
     def stats_by_simulation_add_row(self, success):
         row = {
             'simulation_round': len(self.stats_by_simulation) + 1,
@@ -171,8 +144,7 @@ class QLearningAgent(Agent):
             'cum_reward': self.cum_reward,
             'explored_states_cum': len(self.q_matrix),
             'traffic_violations_count': self.traffic_violations_count,
-            'actions_count': self.actions_count,
-            'moves_available': self.moves_available
+            'actions_count': self.actions_count - 1,
         }
 
         self.stats_by_simulation.append(row)
@@ -189,8 +161,7 @@ class QLearningAgent(Agent):
                 'cum_reward',
                 'explored_states_cum',
                 'traffic_violations_count',
-                'actions_count',
-                'moves_available'
+                'actions_count'
             ]
         )
 
@@ -213,8 +184,6 @@ class QLearningAgent(Agent):
 
         self.actions_count = 0
         self.traffic_violations_count = 0
-
-        self.moves_available = 0
 
     def get_cum_reward(self):
         return self.cum_reward
@@ -253,16 +222,6 @@ class QLearningAgent(Agent):
 
         self.q_matrix[(previous_state, previous_action)] = new_q_value
 
-    # Old version of learn method
-    # def learn(self, previous_state, previous_action, reward, state):
-    #     old_q_value = self.q_matrix.get((previous_state, previous_action), None)
-    #     if old_q_value is None:
-    #         self.q_matrix[(previous_state, previous_action)] = reward
-    #     else:
-    #         max_q_new = max([self.get_q_value(state, a) for a in self.valid_actions])
-    #         learned_value = reward + self.gamma * max_q_new
-    #         self.q_matrix[(previous_state, previous_action)] = old_q_value + self.alpha * (learned_value - old_q_value)
-
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
@@ -281,8 +240,6 @@ class QLearningAgent(Agent):
         reward = self.env.act(self, action)
 
         # Code for stats purpose - BEGIN
-        if self.moves_available == 0:
-            self.moves_available = deadline
         self.actions_count += 1
         if reward == -1.0:
             self.traffic_violations_count += 1
