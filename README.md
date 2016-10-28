@@ -649,28 +649,12 @@ Chart(stats_tuned).mark_line().encode(
 )
 ```
 
+[](images/vega_chart_1.png)
 
-<div class="vega-embed" id="f2fe0ddb-934b-48bb-b437-86fb062765fc"></div>
+![](images/vega_chart_1.png)
 
-<style>
-.vega-embed svg, .vega-embed canvas {
-  border: 1px dotted gray;
-}
-
-.vega-embed .vega-actions a {
-  margin-right: 6px;
-}
-</style>
-
-
-
-
-
-
-![png](output_26_2.png)
-
-
-As expected abount round 10 onwards the number of explored states increses much slower that at the initial rounds. It seems that explored will stabilize around 60-65, but a test with more than 100 round simulations is needed to confirm this trend.
+As expected abount round 10 onwards the number of explored states increses much slower that at the initial rounds. It seems
+that explored will stabilize around 60-65, but a test with more than 100 round simulations is needed to confirm this trend.
 
 Other important aspect is the the number of possible locations for the smartcab:
 
@@ -692,28 +676,9 @@ Chart(stats_tuned).mark_line().encode(
 )
 ```
 
+![](images/vega_chart_2.png)
 
-<div class="vega-embed" id="955372c8-9f17-420c-a291-758a9d8738b0"></div>
-
-<style>
-.vega-embed svg, .vega-embed canvas {
-  border: 1px dotted gray;
-}
-
-.vega-embed .vega-actions a {
-  margin-right: 6px;
-}
-</style>
-
-
-
-
-
-
-![png](output_29_2.png)
-
-
-As expected we can see that about round 60, the *QLearnAgent* still incurs on some traffic violations.
+As expected we can see he *QLearnAgent* needs many round to learn to avoid traffic penalties.
 
 #### 4.4.2. *gamma_rate*
 
