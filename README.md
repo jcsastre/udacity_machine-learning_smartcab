@@ -5,8 +5,6 @@
 
 As starting task, we will move the smartcab around the environment using a random approach. The set of possible actions will be: None, forward, left, right. The deadline will be set to false, but this doesn't mean that smartcab has an infinite number of moves as can see on code of the file **smartcab/environment.py** (but will increase a lot the number of moves available).
 
-The code corresponding to this agent can be found on the class **RandomAgent** at the file **smartcab/agents.py**.
-
 Observations from simulation:
 
 1. Normally the smartcab action is not optimal, but normally reaches the destination because has a lot of moves available to reach the destination.
@@ -48,9 +46,7 @@ Having in mind the properties used for the state, and possible values for each o
 
 ## 3. Implement a Q-Learning Driving Agent
 
-The third task is to implement the Q-Learning algorithm for the driving agent. The code corresponding to this agent can be found on the class **QLearningAgent** at the file **smartcab/agents.py**.
-
-The core of the algorithm is a simple value iteration update. It assumes the old value and makes a correction based on the new information (Source: [Wikipedia](https://en.wikipedia.org/wiki/Q-learning)):
+The third task is to implement the Q-Learning algorithm for the driving agent. The core of the algorithm is a simple value iteration update. It assumes the old value and makes a correction based on the new information (Source: [Wikipedia](https://en.wikipedia.org/wiki/Q-learning)):
 
 ![](images/qlearn.png)
 
@@ -60,7 +56,7 @@ In the formula shown above, two contants can be seen:
 - **alpha_rate (α)** or **learning rate**: Determines to what extent the newly acquired information will override the old information.
 - **gamma rate (γ)** or **discount factor**: Determines the importance of future rewards.
 
-Another important parameter when *QLearnAgent* should choose an action is the **epsilon_rate (ε)** or **exploration rate**. This parameter determines when to explore new states, or when to exploit already learn information.
+Another important parameter when *LearningAgent* should choose an action is the **epsilon_rate (ε)** or **exploration rate**. This parameter determines when to explore new states, or when to exploit already learn information.
 
 Finally another important value is the **Q init-value**, that is the value assigned to initialize the *Q matrix*. Please, notice that in the code I don't make a static initialization. Instead, in the method **get_q_value** I return **self.q_init_value** if no value for the key is found:
 
@@ -70,11 +66,11 @@ def get_q_value(self, state, action):
     return self.q_matrix.get(key, self.q_init_value)
 ~~~~
 
-The param **self.q_init_value** can be set on the parameters of the *QLearnAgent* constructor.
+The param **self.q_init_value** can be set on the parameters of the *LearningAgent* constructor.
 
-In my first attempt I will try with a very *exploratory* *QLearnAgent*. I will assign these values: *alpha_rate = 0.7*, *gamma rate = 0.5*, *epsilon_rate = 0.9* and *Q init-value = 10*.
+In my first attempt I will try with a very *exploratory* *QLearnAgent*. I will assign these values: *alpha_rate = 0.7*, *gamma rate = 0.5*, *epsilon_rate = 0.9* and *Q init-value = 10* (in fact are the default values defined in the constructor of *LearningAgent*).
 
-The simulation will be executed 100 times, with enforce_deadline to True. Some coded has been create to generate stats that I will analyze.
+The simulation will be executed 100 times, with enforce_deadline to True. Some temporal code has been created to generate stats that I will analyze.
 
 ### 3.1. Analysis of generated data {#section}
 
@@ -82,7 +78,7 @@ The simulation will be executed 100 times, with enforce_deadline to True. Some c
 ```python
 import pandas as pd
 
-data_q_first = pd.read_csv("smartcab/main_q-agent_first_stats.csv", index_col=0)
+data_q_first = pd.read_csv("smartcab/q-agent_first_stats.csv", index_col=0)
 ```
 
 The generated stats consist on a table containing 100 rows (one by simulation round), and 6 columns:
@@ -335,9 +331,7 @@ data_q_first.tail(10)
 
 
 
-We see more or less the same behaviour that in the first rounds, but the number of new states explored has increased a lot.
-
-I didn't notice many changes with respect to the *RandomAgent*. The *exploratory nature* of our *QLearnAgent* causes that his behaviour in the first 100 rounds is more or less the same than the *RandomAgent*.
+I didn't notice many changes with respect to the basic agent of first section. The *exploratory nature* of our *LearnAgent* causes that in the 100 first simulation explores a lot of unknown states. But it is learning, so if it can perform more simulations, would perform much better than the basic agent.
 
 ## 4. Improve the Q-Learning Driving Agent
 
@@ -357,13 +351,11 @@ The total of combinations will be 375 (3x5x5x5). For each of the combinations, 1
 
 For each combination of parameters we will aggregatte **ONLY** the results from the last 10 simulations of the *QLearningAgent*. These aggregated stats will be stored on a csv file, that we will analyze.
 
-The correspoding code to do the *Grid Search* and to generate the aggreggated stats can be found on **smartcab/main_qlearn_agent_tuning.py**.
-
 
 ```python
 import pandas as pd
 
-tuning_data = pd.read_csv("smartcab/qlearn_agent_tuning_results_3_samples.csv", index_col=0)
+tuning_data = pd.read_csv("other/qlearn_agent_tuning_results.csv", index_col=0)
 ```
 
 Let's see the first row to understand the columns contained:
@@ -424,7 +416,7 @@ Each row corresponds to a simulation. The columns are:
 
 ### 4.2. An optimal policy
 
-Before looking for the optimal combination of parameters, we should define an optimal policy for the *QLearnAgent*.
+Before looking for the optimal combination of parameters, we should define an optimal policy for the *LearnAgent*.
 
 In my opinion an optimal policy for the smartcab is one that (in order of importance):
 1. Minimizes the number of traffic violations.
@@ -621,12 +613,13 @@ So based in my criteria for an optimal policy, the parameter values to use are:
 - *epsilon_rate* = 0.0
 - *gamma rate* = 0.5
 
-### 4.4. How these combination of parameters influence QLearnAgent behaviour
+These values define a *conservative* agent, that with only 100 simulations rounds done, perform much better than *explorative* agents. But let's see in detail the influence of the parameters.
 
-To proceed to the analysis, let's generate detailed stats for a *QLearnAgent* using these values for parameters.
+### 4.4. How these combination of parameters influence *LearnAgent* behaviour
 
-In **smartcab/main_qlearn_agent_tuned.py** we execute 100 simulations and store the stats on a cvs file. The data generated follows the same pattern that data generated on 
-[section 3.1](###3.1).
+To proceed to the analysis, let's generate detailed stats for a *LearnAgent* using these values for parameters.
+
+I will execute 100 simulations and store the stats on a cvs file. The data generated follows the same pattern that data generated on [section 3.1](###3.1).
 
 
 ```python
