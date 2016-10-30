@@ -21,7 +21,7 @@ class Simulator(object):
         'orange'  : (255, 128,   0)
     }
 
-    def __init__(self, env, size=None, update_delay=1.0, display=True):
+    def __init__(self, env, size=None, update_delay=1.0, display=True, debug_traces=False):
         self.env = env
         self.size = size if size is not None else ((self.env.grid_size[0] + 1) * self.env.block_size, (self.env.grid_size[1] + 1) * self.env.block_size)
         self.width, self.height = self.size
@@ -59,10 +59,13 @@ class Simulator(object):
                 self.display = False
                 print "Simulator.__init__(): Error initializing GUI objects; display disabled.\n{}: {}".format(e.__class__.__name__, e)
 
+        self.debug_traces = debug_traces
+
     def run(self, n_trials=1):
         self.quit = False
         for trial in xrange(n_trials):
-            print "Simulator.run(): Trial {}".format(trial)  # [debug]
+            if self.debug_traces:
+                print "Simulator.run(): Trial {}".format(trial)  # [debug]
             self.env.reset()
             self.current_time = 0.0
             self.last_updated = 0.0
@@ -104,6 +107,8 @@ class Simulator(object):
 
             if self.quit:
                 break
+
+        # self.env.plot_primary_agent_stats()
 
     def render(self):
         # Clear screen

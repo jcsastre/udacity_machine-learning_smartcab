@@ -1,8 +1,6 @@
-import time
 import random
 from collections import OrderedDict
-
-from simulator import Simulator
+from agents import DummyAgent
 
 class TrafficLight(object):
     """A traffic light that switches periodically."""
@@ -22,7 +20,6 @@ class TrafficLight(object):
             self.state = not self.state  # assuming state is boolean
             self.last_updated = t
 
-
 class Environment(object):
     """Environment within which all agents operate."""
 
@@ -31,7 +28,7 @@ class Environment(object):
     valid_headings = [(1, 0), (0, -1), (-1, 0), (0, 1)]  # ENWS
     hard_time_limit = -100  # even if enforce_deadline is False, end trial when deadline reaches this value (to avoid deadlocks)
 
-    def __init__(self, num_dummies=3):
+    def __init__(self, num_dummies=3, debug_traces=False):
         self.num_dummies = num_dummies  # no. of dummy agents
         
         # Initialize simulation variables
@@ -65,6 +62,8 @@ class Environment(object):
         self.primary_agent = None  # to be set explicitly
         self.enforce_deadline = False
 
+        self.debug_traces = debug_traces
+
     def create_agent(self, agent_class, *args, **kwargs):
         agent = agent_class(self, *args, **kwargs)
         self.agent_states[agent] = {'location': random.choice(self.intersections.keys()), 'heading': (0, 1)}
@@ -72,7 +71,11 @@ class Environment(object):
 
     def set_primary_agent(self, agent, enforce_deadline=False):
         self.primary_agent = agent
+        self.agent_states[agent] = {'location': random.choice(self.intersections.keys()), 'heading': (0, 1)}
         self.enforce_deadline = enforce_deadline
+
+    def plot_primary_agent_stats(self):
+        self.primary_agent.stats_plot()
 
     def reset(self):
         self.done = False
@@ -93,7 +96,7 @@ class Environment(object):
 
         start_heading = random.choice(self.valid_headings)
         deadline = self.compute_dist(start, destination) * 5
-        print "Environment.reset(): Trial set up with start = {}, destination = {}, deadline = {}".format(start, destination, deadline)
+        # print "Environment.reset(): Trial set up with start = {}, destination = {}, deadline = {}".format(start, destination, deadline)
 
         # Initialize agent(s)
         for agent in self.agent_states.iterkeys():
@@ -122,10 +125,18 @@ class Environment(object):
             agent_deadline = self.agent_states[self.primary_agent]['deadline']
             if agent_deadline <= self.hard_time_limit:
                 self.done = True
-                print "Environment.step(): Primary agent hit hard time limit ({})! Trial aborted.".format(self.hard_time_limit)
+                if self.debug_traces:
+                    print "\t*** Environment.step(): Primary agent hit hard time limit ({})! Trial aborted. ***".format(self.hard_time_limit)
+                self.primary_agent.stats_by_simulation_add_row(False)
             elif self.enforce_deadline and agent_deadline <= 0:
                 self.done = True
-                print "Environment.step(): Primary agent ran out of time! Trial aborted."
+                if self.debug_traces:
+                    print "\t*** Environment.step(): Primary agent ran out of time! Trial aborted. ***"
+                self.primary_agent.stats_by_simulation_add_row(False)
+                # self.primary_agent.stats_save_to_file()
+
+                # print "LearningAgent stats: q_values_count = {}, reward_cum = {}".format(0,
+                #                                                                          self.primary_agent.cum_reward)  # [debug]
             self.agent_states[self.primary_agent]['deadline'] = agent_deadline - 1
 
         self.t += 1
@@ -210,7 +221,9 @@ class Environment(object):
                 if state['deadline'] >= 0:
                     reward += 10  # bonus
                 self.done = True
-                print "Environment.act(): Primary agent has reached destination!"  # [debug]
+                if self.debug_traces:
+                    print "\t*** Environment.act(): Primary agent has reached destination! ***" # [debug]
+                self.primary_agent.stats_by_simulation_add_row(True)
             self.status_text = "state: {}\naction: {}\nreward: {}".format(agent.get_state(), action, reward)
             #print "Environment.act() [POST]: location: {}, heading: {}, action: {}, reward: {}".format(location, heading, action, reward)  # [debug]
 
@@ -219,56 +232,3 @@ class Environment(object):
     def compute_dist(self, a, b):
         """L1 distance between two points."""
         return abs(b[0] - a[0]) + abs(b[1] - a[1])
-
-
-class Agent(object):
-    """Base class for all agents."""
-
-    def __init__(self, env):
-        self.env = env
-        self.state = None
-        self.next_waypoint = None
-        self.color = 'cyan'
-
-    def reset(self, destination=None):
-        pass
-
-    def update(self, t):
-        pass
-
-    def get_state(self):
-        return self.state
-
-    def get_next_waypoint(self):
-        return self.next_waypoint
-
-
-class DummyAgent(Agent):
-    color_choices = ['blue', 'cyan', 'magenta', 'orange']
-
-    def __init__(self, env):
-        super(DummyAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
-        self.next_waypoint = random.choice(Environment.valid_actions[1:])
-        self.color = random.choice(self.color_choices)
-
-    def update(self, t):
-        inputs = self.env.sense(self)
-
-        action_okay = True
-        if self.next_waypoint == 'right':
-            if inputs['light'] == 'red' and inputs['left'] == 'forward':
-                action_okay = False
-        elif self.next_waypoint == 'forward':
-            if inputs['light'] == 'red':
-                action_okay = False
-        elif self.next_waypoint == 'left':
-            if inputs['light'] == 'red' or (inputs['oncoming'] == 'forward' or inputs['oncoming'] == 'right'):
-                action_okay = False
-
-        action = None
-        if action_okay:
-            action = self.next_waypoint
-            self.next_waypoint = random.choice(Environment.valid_actions[1:])
-        reward = self.env.act(self, action)
-        #print "DummyAgent.update(): t = {}, inputs = {}, action = {}, reward = {}".format(t, inputs, action, reward)  # [debug]
-        #print "DummyAgent.update(): next_waypoint = {}".format(self.next_waypoint)  # [debug]
